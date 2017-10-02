@@ -14,30 +14,29 @@ def normalpdf(x, u, o):
 def cos_dist(x, u, o=12.0):
     return (1.0 + np.cos((2.0*math.pi * (x - u))/o))/2.0
 
-def shepard_util(times, freq):
-    print freq
-    val = np.sin(freq*(2.0*math.pi) * times)
-    return val
-
 def shepardtone(times, freq, index):
     """generates a shepard tone using frequency multiples of the given frequency"""
     print freq
     osc_list = []
     num_octaves = 10
 
+    # assign whatever waveform type we want here
+    #waveform_generator = wavelib.sawtooth
+    waveform_generator = wavelib.sinewave
+
     # lower octaves
     for osc in range(num_octaves, 0, -1):
         print 'octave = ', 2.0**(-osc)
-        osc_list += [shepard_util(times, freq * 2.0**(-osc))]
+        osc_list += [waveform_generator(times, freq * 2.0**(-osc))]
 
     # actual primary freq
     print 'primary freq'
-    osc_list += [shepard_util(times, freq)]
+    osc_list += [waveform_generator(times, freq)]
 
     # higher octaves
     for osc in range(1, num_octaves):
         print 'octave = ', 2.0**(osc)
-        osc_list += [shepard_util(times, freq * 2.0**(osc))]
+        osc_list += [waveform_generator(times, freq * 2.0**(osc))]
 
     vals = np.zeros(osc_list[0].shape)
     for i in range(0, len(osc_list)):
@@ -50,15 +49,17 @@ def shepardtone(times, freq, index):
 
 def main():
     """main function"""
-    # times is array of values at each time slot of the whole wav file
-    times = wavelib.createtimes(12 * DURATION)
+    start_freq = 440.0
+    steps = 12.0
 
-    #start_freq = 263.0
-    start_freq = 440.0 * (2.0 ** ((times//1.0)/12.0))
-    #start_freq = 440.0 * (2.0 ** ((times)/12.0))
+    # times is array of values at each time slot of the whole wav file
+    times = wavelib.createtimes(steps * DURATION)
+
+    freq = start_freq * (2.0 ** ((times//1.0)/steps)) # floor to even steps
+    #freq = start_freq * (2.0 ** ((times)/steps))     # continuous glissando
 
     vals_list = np.arange(0, 0)
-    vals_list = wavelib.normalize(shepardtone(times, start_freq, times))
+    vals_list = wavelib.normalize(shepardtone(times, freq, times))
 
     # and lets run through it twice, so cat the list together with itself
     vals_list = np.concatenate((vals_list, vals_list), axis=0) 
