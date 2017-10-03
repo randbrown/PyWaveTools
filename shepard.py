@@ -18,7 +18,7 @@ def shepardtone(times, freq, index):
     """generates a shepard tone using frequency multiples of the given frequency"""
     print freq
     osc_list = []
-    num_octaves = 10
+    num_octaves = 3
 
     # assign whatever waveform type we want here
     #waveform_generator = wavelib.sawtooth
@@ -34,7 +34,7 @@ def shepardtone(times, freq, index):
     osc_list += [waveform_generator(times, freq)]
 
     # higher octaves
-    for osc in range(1, num_octaves):
+    for osc in range(1, num_octaves+1):
         print 'octave = ', 2.0**(osc)
         osc_list += [waveform_generator(times, freq * 2.0**(osc))]
 
