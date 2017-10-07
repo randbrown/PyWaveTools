@@ -29,6 +29,26 @@ def normalize(vals):
     """normalize values to 1.0 scale"""
     return vals / np.max(np.abs(vals))
 
+def linear_scale(x, minx, maxx, miny, maxy):
+    return ((x - minx) / (maxx - minx)) * (maxy - miny) + miny
+
+def linear_scale_x(x, miny, maxy):
+    return ((x - x.min()) / (x.max() - x.min())) * (maxy - miny) + miny
+
+def square_scale_x(x, miny, maxy):
+    xx = linear_scale_x(x, 0, 1.0)
+    return np.power(xx, 2)
+
+def quad_scale_x(x, miny, maxy):
+    """good approximation of exp for 0-1"""
+    xx = linear_scale_x(x, 0, 1.0)
+    return np.power(xx, 4)
+
+def exp_scale_x(x, miny, maxy):
+    """exponentially scale x to y values"""
+    xx = linear_scale_x(x, 0, 1.0)
+    return np.exp(6.908*xx)/1000.0
+
 def write_wave_file(filename, vals, nchannels=2, sample_width=2, sample_rate=SAMPLE_RATE):
     """Write wave values to file. Assumes vals have been normalized to 1.0 scale"""
     f_str = ''
