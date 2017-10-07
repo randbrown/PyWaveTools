@@ -17,7 +17,7 @@ def zero(times):
 
 def sinewave(times, freq_hz):
     """sine wave"""
-    return np.sin((freq_hz*times)*(2*math.pi))
+    return np.sin((freq_hz*times)*(2.0*np.pi))
 
 def sawtooth(times, freq_hz):
     """sawtooth wave"""
