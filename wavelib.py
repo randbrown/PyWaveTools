@@ -31,6 +31,11 @@ def triangle(times, freq_hz):
     vals = (2.0 / np.pi )* np.arcsin(np.sin(2.0*np.pi*times/period))
     return vals
 
+def square(times, freq_hz):
+    """square wave"""
+    vals = np.sign(sinewave(times, freq_hz))
+    return vals
+
 def normalize(vals):
     """normalize values to 1.0 scale"""
     return vals / np.max(np.abs(vals))
