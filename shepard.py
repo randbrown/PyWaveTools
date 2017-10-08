@@ -3,17 +3,13 @@ import math
 import wavelib
 import numpy as np
 
-#START_FREQ = 440/4.0
-START_FREQ = 440/8.0
+FREQ_A1 = 55.0
 STEPS = 12.0
 DURATION_PER_STEP = 1.0            # seconds
 TOTAL_DURATION = DURATION_PER_STEP * STEPS
 
-def shepardtone(times, freq, falling=False, num_octaves=5):
-    """generates a shepard tone using frequency multiples of the given frequency"""
-    # assign whatever waveform type we want here
-    #waveform_generator = wavelib.sawtooth
-    waveform_generator = wavelib.sinewave
+def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = wavelib.sinewave):
+    """generates a shepard tone using octaves of the given frequency"""
 
     vals = np.zeros(times.shape)
 
@@ -21,9 +17,9 @@ def shepardtone(times, freq, falling=False, num_octaves=5):
     # to fade one voice out while fading the other in.
     # however, since they're in different octaves and such, i've been playing
     # with alternative scalings
-    #ints_scale = exp_scale_x(times, 0.0, 1.0)
-    #ints_scale = linear_scale_x(times, 0.0, 1.0)
-    ints_scale = wavelib.square_scale_x(times, 0.0, 1.0)
+    #ints_scale = wavelib.exp_scale_x(times, 0.0, 1.0)
+    ints_scale = wavelib.linear_scale_x(times, 0.0, 1.0)
+    #ints_scale = wavelib.square_scale_x(times, 0.0, 1.0)
     ints_scale_rev = ints_scale[::-1]
 
     for i in range(0, num_octaves):
@@ -49,29 +45,49 @@ def shepardtone(times, freq, falling=False, num_octaves=5):
 
     return vals
 
+def shepard_glissando(times, freq_start, freq_end, octaves=5):
+    falling = freq_end < freq_start
+    freq = freq_start
+    if falling:
+        freq = freq_start * (2.0 ** (-1*(times)/(STEPS+1)/2.0))     # continuous glissando
+    else:
+        freq = freq_start * (2.0 ** ((times)/(STEPS-1)/2.0))     # continuous glissando
+    vals = shepardtone(times, freq, falling, octaves)
+    return vals
+
+def shepard_discrete(times, freq_start, freq_end, octaves=5):
+    falling = freq_end < freq_start
+    freq = freq_start
+    if falling:
+        freq = freq_start * (2.0 ** (-1* ((times//1.0)/STEPS))) # floor to even steps
+    else:
+        freq = freq_start * (2.0 ** ((times//1.0)/STEPS)) # floor to even steps
+    vals = shepardtone(times, freq, falling, octaves)
+    return vals
+
+def play_twice(vals):
+    return np.concatenate((vals, vals), axis=0) 
+
 def main():
     """main function"""
 
     # times is array of values at each time slot of the whole wav file
     times = wavelib.createtimes(TOTAL_DURATION)
-    #print 'times', times
 
-    #freq = START_FREQ * (2.0 ** ((times//1.0)/STEPS)) # floor to even steps
-    freq = START_FREQ * (2.0 ** ((times)/(STEPS-1)/2.0))     # continuous glissando
-    falling = False
+    vals = wavelib.normalize(shepard_glissando(times, FREQ_A1*2, FREQ_A1, 5))
+    vals = play_twice(vals)
+    wavelib.write_wave_file('output/shepard_glissando_down_2x.wav', vals)
 
-    # falling tones
-    #freq = START_FREQ * (2.0 ** (-1* ((times//1.0)/STEPS))) # floor to even steps
-    # freq = START_FREQ * (2.0 ** (-1*(times)/(STEPS+1)/2.0))     # continuous glissando
-    # falling = True
+    vals = wavelib.normalize(shepard_discrete(times, FREQ_A1*2, FREQ_A1, 5))
+    vals = play_twice(vals)
+    wavelib.write_wave_file('output/shepard_discrete_down_2x.wav', vals)
 
-    #print 'freq', freq
+    vals = wavelib.normalize(shepard_glissando(times, FREQ_A1, FREQ_A1*2, 5))
+    vals = play_twice(vals)
+    wavelib.write_wave_file('output/shepard_glissando_up_2x.wav', vals)
 
-    vals_list = np.arange(0, 0)
-    vals_list = wavelib.normalize(shepardtone(times, freq, falling, 5))
-
-    # and lets run through it twice, so cat the list together with itself
-    vals_list = np.concatenate((vals_list, vals_list), axis=0) 
-    wavelib.write_wave_file('output/shepard_steps2x.wav', vals_list)
+    vals = wavelib.normalize(shepard_discrete(times, FREQ_A1, FREQ_A1*2, 5))
+    vals = play_twice(vals)
+    wavelib.write_wave_file('output/shepard_discrete_up_2x.wav', vals)
 
 main()
