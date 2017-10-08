@@ -12,14 +12,14 @@ def main():
     times = wavelib.createtimes(DURATION, SAMPLE_RATE)
     # constant frequency
     freq = FREQUENCY
-    vals = wavelib.triangle(times, freq)
+    vals = wavelib.sinewave(times, freq)
     vals = wavelib.normalize(vals)
-    wavelib.write_wave_file('output/triangle.wav', vals)
+    wavelib.write_wave_file('output/sinewave.wav', vals)
 
     # changing frequency
     freq = wavelib.glissando_rate(times, FREQUENCY, FREQUENCY_RATE)
-    vals = wavelib.triangle(times, freq)
-    vals = wavelib.normalize(vals)
-    wavelib.write_wave_file('output/fallingtriangle.wav', vals)
+    vals = wavelib.sinewave(times, freq)
+    #vals = wavelib.normalize(vals)
+    wavelib.write_wave_file('output/fallingsinewave.wav', vals)
 
 main()

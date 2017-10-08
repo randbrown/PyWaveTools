@@ -10,7 +10,7 @@ def main():
     """main function"""
     # x is array of values at each time slot of the whole wav file
     times = wavelib.createtimes(DURATION, SAMPLE_RATE)
-    freq = FREQUENCY + (times*FREQUENCY_RATE)
+    freq = wavelib.glissando_rate(times, FREQUENCY, FREQUENCY_RATE)
     vals1 = wavelib.sinewave(times, freq)
     vals2 = wavelib.sinewave(times, freq* 3/2)  # perfect fifth
     vals3 = wavelib.sinewave(times, freq* 5/4)  # perfect third

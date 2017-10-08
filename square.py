@@ -17,7 +17,7 @@ def main():
     wavelib.write_wave_file('output/square.wav', vals)
 
     # changing frequency
-    freq = (FREQUENCY + (times*FREQUENCY_RATE))
+    freq = wavelib.glissando_rate(times, FREQUENCY, FREQUENCY_RATE)
     vals = wavelib.square(times, freq)
     vals = wavelib.normalize(vals)
     wavelib.write_wave_file('output/fallingsquare.wav', vals)

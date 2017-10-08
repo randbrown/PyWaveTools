@@ -47,21 +47,13 @@ def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = 
 
 def shepard_glissando(times, freq_start, freq_end, octaves=5):
     falling = freq_end < freq_start
-    freq = freq_start
-    if falling:
-        freq = freq_start * (2.0 ** (-1*(times)/(STEPS+1)/2.0))     # continuous glissando
-    else:
-        freq = freq_start * (2.0 ** ((times)/(STEPS-1)/2.0))     # continuous glissando
+    freq = wavelib.glissando(times, freq_start, freq_end)
     vals = shepardtone(times, freq, falling, octaves)
     return vals
 
 def shepard_discrete(times, freq_start, freq_end, octaves=5):
     falling = freq_end < freq_start
-    freq = freq_start
-    if falling:
-        freq = freq_start * (2.0 ** (-1* ((times//1.0)/STEPS))) # floor to even steps
-    else:
-        freq = freq_start * (2.0 ** ((times//1.0)/STEPS)) # floor to even steps
+    freq = wavelib.discrete(times, freq_start, freq_end, STEPS)
     vals = shepardtone(times, freq, falling, octaves)
     return vals
 

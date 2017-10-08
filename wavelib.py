@@ -15,9 +15,29 @@ def zero(times):
     """create a numpy array holding 0's"""
     return times * 0
 
+def glissando(times, start_freq, end_freq):
+    """returns frequency array to represent glissando from start to end pitches"""
+    # some weird problem where we only need to scale "half way there" to get the desired pitch
+    return linear_scale_x(times, start_freq, (start_freq + end_freq)/2.0) 
+
+def glissando_rate(times, start_freq, freq_rate):
+    """returns frequency array to represent glissando from start at a given rate"""
+    # some weird problem where we only need to scale "half way there" to get the desired pitch
+    return (start_freq + (times*freq_rate/2.0)) 
+
+def discrete(times, start_freq, end_freq, steps):
+    """returns frequency array to represent steps from start to end pitches"""
+    falling = end_freq < start_freq
+    if falling:
+        freq = start_freq * (2.0 ** (-1* ((times//1.0)/steps))) # floor to even steps
+    else:
+        freq = start_freq * (2.0 ** ((times//1.0)/steps)) # floor to even steps
+    return freq
+
 def sinewave(times, freq_hz):
     """sine wave"""
-    return np.sin((freq_hz*times)*(2.0*np.pi))
+    vals = np.sin(freq_hz*times*2.0*np.pi)
+    return vals
 
 def sawtooth(times, freq_hz):
     """sawtooth wave"""

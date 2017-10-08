@@ -17,7 +17,7 @@ def main():
     wavelib.write_wave_file('output/sawtooth.wav', vals)
 
     # changing frequency
-    freq = (FREQUENCY + (times*FREQUENCY_RATE))
+    freq = wavelib.glissando_rate(times, FREQUENCY, FREQUENCY_RATE)
     vals = wavelib.sawtooth(times, freq)
     vals = wavelib.normalize(vals)
     wavelib.write_wave_file('output/fallingsawtooth.wav', vals)
