@@ -7,6 +7,33 @@ import numpy as np
 SAMPLE_RATE = 44100.0       # hertz
 MAX_AMP = 32767.0           # max wave amplitude
 
+FREQ_A1 = 55.0
+FREQ_A2 = FREQ_A1*2.0
+FREQ_A3 = FREQ_A2*2.0
+FREQ_A4 = FREQ_A3*2.0
+FREQ_A5 = FREQ_A4*2.0
+FREQ_A6 = FREQ_A5*2.0
+FREQ_A7 = FREQ_A6*2.0
+FREQ_A8 = FREQ_A7*2.0
+
+UNISON = 1.0/1.0
+MAJOR_SECOND = 9.0/8.0
+DIMINISHED_THIRD = 256.0/225.0
+MINOR_THIRD = 6.0/5.0
+MAJOR_THIRD = 5.0/4.0
+AUGMENTED_THIRD = 125.0/96.0
+PERFECT_FOURTH = 4.0/3.0
+PERFECT_FIFTH = 3.0/2.0
+DIMINISHED_FIFTH = 64.0/45.0
+AUGMENTED_FIFTH = 25.0/16.0
+MINOR_SIXTH = 8.0/5.0
+MAJOR_SIXTH = 5.0/3.0
+DIMINISHED_SEVENTH = 128.0/75.0
+MINOR_SEVENTH = 9.0/5.0
+MAJOR_SEVENTH = 15.0/8.0
+AUGMENTED_SEVENTH = 125.0/64.0
+OCTAVE = 2.0/1.0
+
 def createtimes(duration_seconds, sample_rate=SAMPLE_RATE):
     """create a numpy array holding the timestamp of each wave data point"""
     return np.arange(0, duration_seconds, 1.0/sample_rate)
@@ -80,6 +107,9 @@ def exp_scale_x(x, miny, maxy):
     xx = linear_scale_x(x, 0, 1.0)
     return np.exp(6.908*xx)/1000.0
 
+def play_n(vals, n):
+    return np.tile(vals, n)
+
 def write_wave_file(filename, vals, nchannels=2, sample_width=2, sample_rate=SAMPLE_RATE):
     """Write wave values to file. Assumes vals have been normalized to 1.0 scale"""
     f_str = ''
@@ -132,3 +162,20 @@ def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = 
         vals += valsi
 
     return vals
+
+def fx_delay(vals, delay_ms = 500.0, decay = 0.5, sample_rate=SAMPLE_RATE):
+    delay_samples = int(delay_ms * sample_rate/1000.0)
+    # note we are effecting the array in-place.  could return just the effects portion as separate array???
+    #valsd = np.zeros(vals.shape)
+    valsd = vals
+    for i in range(0, len(vals)-delay_samples):
+        valsd[i+delay_samples] += vals[i] * decay
+    return valsd
+
+def fx_delay_np(vals, delay_ms, decay, sample_rate=SAMPLE_RATE):
+    """delay. same as fx_delay but this will allow the decay to be a numpy array"""
+    #####NOTE I'm not sure this is quite right. i think it may not decay properly
+    delay_samples = int(delay_ms * sample_rate/1000.0)
+    valsd = vals
+    valsd[delay_samples:] += valsd[:-delay_samples] * decay
+    return valsd
