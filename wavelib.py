@@ -25,6 +25,12 @@ def sawtooth(times, freq_hz):
     vals = 2.0 * (times/period - np.floor(.5 + times/period))
     return vals
 
+def triangle(times, freq_hz):
+    """triangle wave"""
+    period = 1.0/freq_hz
+    vals = (2.0 / np.pi )* np.arcsin(np.sin(2.0*np.pi*times/period))
+    return vals
+
 def normalize(vals):
     """normalize values to 1.0 scale"""
     return vals / np.max(np.abs(vals))
