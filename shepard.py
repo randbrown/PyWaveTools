@@ -4,7 +4,7 @@ import wavelib
 import numpy as np
 
 #START_FREQ = 440/4.0
-START_FREQ = 440/2.0
+START_FREQ = 440/8.0
 STEPS = 12.0
 DURATION_PER_STEP = 1.0            # seconds
 TOTAL_DURATION = DURATION_PER_STEP * STEPS
@@ -44,8 +44,7 @@ def shepardtone(times, freq, falling=False, num_octaves=5):
             valsi = valsi * intsi
             #print 'intsi', i, intsi
 
-        wavelib.write_wave_file('output/shepard_' + str(i) + '.wav', valsi)
-
+        #wavelib.write_wave_file('output/shepard_' + str(i) + '.wav', valsi)
         vals += valsi
 
     return vals
@@ -55,24 +54,18 @@ def main():
 
     # times is array of values at each time slot of the whole wav file
     times = wavelib.createtimes(TOTAL_DURATION)
+    #print 'times', times
 
-    print 'times', times
-    print 'times//1.0/STEPS', times//1.0/STEPS
-    print 'times/STEPS', times/STEPS
-    print 'times/STEPS/2.0', times/STEPS/2.0
-    print '((times)/(STEPS+1)/2.0)', ((times)/(STEPS+1)/2.0)
     #freq = START_FREQ * (2.0 ** ((times//1.0)/STEPS)) # floor to even steps
-    #freq = START_FREQ * (2.0 ** ((times)/(STEPS+1)/2.0))     # continuous glissando
-    #freq = START_FREQ * (2.0 ** ((times)/STEPS/1.0))     # continuous glissando
-    #falling = False
+    freq = START_FREQ * (2.0 ** ((times)/(STEPS-1)/2.0))     # continuous glissando
+    falling = False
 
     # falling tones
     #freq = START_FREQ * (2.0 ** (-1* ((times//1.0)/STEPS))) # floor to even steps
-    freq = START_FREQ * (2.0 ** (-1*(times)/(STEPS+1)/2.0))     # continuous glissando
-    falling = True
+    # freq = START_FREQ * (2.0 ** (-1*(times)/(STEPS+1)/2.0))     # continuous glissando
+    # falling = True
 
-    # wavelib.write_wave_file('output/sine.wav', wavelib.normalize(wavelib.sinewave(times, freq)))
-    # wavelib.write_wave_file('output/saw.wav', wavelib.normalize(wavelib.sawtooth(times, freq)))
+    #print 'freq', freq
 
     vals_list = np.arange(0, 0)
     vals_list = wavelib.normalize(shepardtone(times, freq, falling, 5))
