@@ -95,14 +95,16 @@ def main():
 
     vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A2, wavelib.FREQ_A1, diminished_fifth_sine, 6))
     vals = wavelib.play_n(vals, 5)
-    vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=100.0, decay=0.5))
-    vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=300.0, decay=0.2))
-    wavelib.write_wave_file('output/shepard_glissando_down_5x_fx_diminished.wav', vals)
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=20.0, decay=0.5))
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=41.3, decay=0.3))
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=59.77, decay=0.2))
+    wavelib.write_wave_file('output/shepard_glissando_down_5x_diminished.wav', vals)
 
     vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A1, wavelib.FREQ_A2, diminished_fifth_sine, 6))
     vals = wavelib.play_n(vals, 5)
-    vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=100.0, decay=0.5))
-    vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=300.0, decay=0.2))
-    wavelib.write_wave_file('output/shepard_glissando_up_5x_fx_diminished.wav', vals)
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=20.0, decay=0.5))
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=41.3, decay=0.3))
+    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=59.77, decay=0.2))
+    wavelib.write_wave_file('output/shepard_glissando_up_5x_diminished.wav', vals)
 
 main()
