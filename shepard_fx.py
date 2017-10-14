@@ -7,6 +7,7 @@ STEPS = 12.0
 DURATION_PER_STEP = 1.0            # seconds
 TOTAL_DURATION = DURATION_PER_STEP * STEPS
 
+
 def shepard_glissando(times, freq_start, freq_end, wave_generator, octaves=5):
     falling = freq_end < freq_start
     freq = wavelib.glissando(times, freq_start, freq_end)
@@ -93,18 +94,16 @@ def main():
     # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=300.0, decay=0.2))
     # wavelib.write_wave_file('output/shepard_glissando_up_2x_fx_augmented.wav', vals)
 
-    vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A2, wavelib.FREQ_A1, diminished_fifth_sine, 6))
-    vals = wavelib.play_n(vals, 5)
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=20.0, decay=0.5))
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=41.3, decay=0.3))
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=59.77, decay=0.2))
-    wavelib.write_wave_file('output/shepard_glissando_down_5x_diminished.wav', vals)
+    vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A2, wavelib.FREQ_A1, diminished_fifth_sine, 4))
+    vals = wavelib.play_n(vals, 2)
+    wavelib.write_wave_file('output/shepard_down.wav', vals)
+    vals = wavelib.normalize(wavelib.fx_reverb(vals, room_size_x=20.0, decay=0.2))
+    wavelib.write_wave_file('output/shepard_down_reverb.wav', vals)
 
-    vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A1, wavelib.FREQ_A2, diminished_fifth_sine, 6))
-    vals = wavelib.play_n(vals, 5)
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=20.0, decay=0.5))
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=41.3, decay=0.3))
-    # vals = wavelib.normalize(wavelib.fx_delay(vals, delay_ms=59.77, decay=0.2))
-    wavelib.write_wave_file('output/shepard_glissando_up_5x_diminished.wav', vals)
+    vals = wavelib.normalize(shepard_glissando(times, wavelib.FREQ_A1, wavelib.FREQ_A2, diminished_fifth_sine, 4))
+    vals = wavelib.play_n(vals, 2)
+    wavelib.write_wave_file('output/shepard_up.wav', vals)
+    vals = wavelib.normalize(wavelib.fx_reverb(vals, room_size_x=20.0, decay=0.2))
+    wavelib.write_wave_file('output/shepard_up_reverb.wav', vals)
 
 main()

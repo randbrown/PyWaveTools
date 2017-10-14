@@ -167,6 +167,11 @@ def fx_delay(vals, delay_ms = 500.0, decay = 0.5, sample_rate=SAMPLE_RATE):
     delay_samples = int(delay_ms * sample_rate/1000.0)
     # note we are effecting the array in-place.  could return just the effects portion as separate array???
     #valsd = np.zeros(vals.shape)
+    return fx_delay_num_samples(vals, delay_samples, decay)
+
+def fx_delay_num_samples(vals, delay_samples = 500, decay = 0.5):
+    # note we are effecting the array in-place.  could return just the effects portion as separate array???
+    #valsd = np.zeros(vals.shape)
     valsd = vals
     for i in range(0, len(vals)-delay_samples):
         valsd[i+delay_samples] += vals[i] * decay
@@ -179,3 +184,46 @@ def fx_delay_np(vals, delay_ms, decay, sample_rate=SAMPLE_RATE):
     valsd = vals
     valsd[delay_samples:] += valsd[:-delay_samples] * decay
     return valsd
+
+# def fx_reverb(vals, room_size_x = 20.0, decay = 0.5, sample_rate=SAMPLE_RATE):
+#     # speed of sound 340 m/s, approximate the echo delay
+#     echo_ms = room_size_x/2.0/340.0
+#     #TODO use echo delay
+#     #TODO use decay_multiplier
+#     #delay_samples_list = [919, 997, 1061, 1093, 1129, 1151, 1171, 1187, 1213, 1237, 1259, 1283, 1303, 1319, 1327, 1361]
+#     delay_samples_list = [97, 191, 277, 367, 457, 541, 639, 737, 821, 919, 997, 1061, 1093, 1129, 1151, 1171, 1187, 1213, 1237, 1259, 1283, 1303, 1319, 1327, 1361]
+#     #delay_samples_list = [919,  1061,  1129,  1171,  1213,  1259,  1303,  1327]
+    
+#     for i in range(len(delay_samples_list)):
+#         #vals = fx_delay_num_samples(vals, delay_samples_list[i], decay /(i+1))
+#         vals = fx_delay_num_samples(vals, delay_samples_list[i], decay /(2.0**i))
+
+#     return vals
+
+# def comb_filter(vals, delay_time=29.7, reverb_time=1.0):
+#     out = 0
+#     output = np.zeros(vals.shape)
+#     delay_buffer = np.zeros(vals.shape)
+#     pos = 0
+#     g = 0.001 ** (delay_time/reverb_time)
+#     for i in range(1,len(vals)-1):
+#         out = delay_buffer[pos]
+#         delay_buffer[pos] = vals[i] + out*g
+#         output[i] = out
+#         pos = pos + 1
+
+#     return output
+
+# def all_pass_filter(vals, delay_time=29.7, reverb_time=1.0):
+#     out = 0
+#     output = np.zeros(vals.shape)
+#     delay_buffer = np.zeros(vals.shape)
+#     pos = 0
+#     g = 0.001 ** (delay_time/reverb_time)
+#     for i in range(len(vals)):
+#         out = delay_buffer[pos]
+#         delay_buffer[pos] = vals[i] + out*g
+#         vals[i] = out - g*input[i]
+#         pos = pos + 1
+
+#     return output
