@@ -14,6 +14,7 @@ NOTE_DURATION = 1   # play each n seconds
 DURATION = len(NOTES) * NOTE_DURATION
 
 def circle_fourths_discrete():
+    # keep it within one octave, so we'll invert as needed
     notemin = NOTE
     notemax = NOTE * 2
     times = wavelib.createtimes(DURATION, SAMPLE_RATE)
@@ -35,12 +36,10 @@ def circle_fourths_discrete():
             #print i, interval, note, f, startidx, endidx 
             freq[startidx:endidx] = f
         #print n, note, freq
-        vals1 = wavelib.sinewave(times, freq)
-        vals1 = wavelib.normalize(vals1)
-        vals += wavelib.normalize(vals1)
+        vals += wavelib.sinewave(times, freq)
 
     vals = wavelib.normalize(vals)
-    vals = wavelib.play_n(vals, 2)
+    vals = wavelib.play_n(vals, 5)
     wavelib.write_wave_file('output/circle_fourths_chords.wav', vals)
 
 circle_fourths_discrete()
