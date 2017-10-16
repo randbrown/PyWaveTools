@@ -7,7 +7,8 @@ NOTE = wavelib.FREQ_A3
 NOTES = [NOTE]
 note = NOTE
 for i in range(1, 12):
-    note = note * wavelib.PERFECT_FOURTH
+    #note = note * wavelib.PERFECT_FOURTH
+    note = NOTE * (2**(5*i/12.0)) # equal temperament
     NOTES.append(note)
 
 NOTE_DURATION = 1   # play each n seconds
