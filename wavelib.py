@@ -45,13 +45,11 @@ def zero(times):
 
 def glissando(times, start_freq, end_freq):
     """returns frequency array to represent glissando from start to end pitches"""
-    # some weird problem where we only need to scale "half way there" to get the desired pitch
-    return linear_scale_x(times, start_freq, (start_freq + end_freq)/2.0) 
+    return linear_scale_x(times, start_freq, end_freq) 
 
 def glissando_rate(times, start_freq, freq_rate):
     """returns frequency array to represent glissando from start at a given rate"""
-    # some weird problem where we only need to scale "half way there" to get the desired pitch
-    return (start_freq + (times*freq_rate/2.0)) 
+    return (start_freq + (times*freq_rate)) 
 
 def discrete(times, start_freq, end_freq, steps):
     """returns frequency array to represent steps from start to end pitches"""
@@ -62,21 +60,56 @@ def discrete(times, start_freq, end_freq, steps):
         freq = start_freq * (2.0 ** ((times//1.0)/steps)) # floor to even steps
     return freq
 
+def get_phase_correction_periodic(times, freq_hz):
+    """ Calculate phase correction for the frequencies in the case of moving frequencies,
+    or otherwise the resulting tone will rise or fall much faster due to the various frequencies
+    being out of phase with each other.
+    https://stackoverflow.com/questions/3089832/sine-wave-glissando-from-one-pitch-to-another-in-numpy
+    """
+    do_phase_correct = type(freq_hz).__module__ == np.__name__
+    phase_correction = 1.0
+    if do_phase_correct:
+        phase_correction = np.add.accumulate(times*np.concatenate((np.zeros(1), 2*np.pi*(freq_hz[:-1]-freq_hz[1:]))))
+    return phase_correction
+
+def get_phase_correction_linear(times, freq_hz):
+    """ Calculate phase correction for the frequencies in the case of moving frequencies,
+    or otherwise the resulting tone will rise or fall much faster due to the various frequencies
+    being out of phase with each other.
+    https://stackoverflow.com/questions/3089832/sine-wave-glissando-from-one-pitch-to-another-in-numpy
+    """
+    do_phase_correct = type(freq_hz).__module__ == np.__name__
+    phase_correction = 1.0
+    if do_phase_correct:
+        phase_correction = np.add.accumulate(times*np.concatenate((np.zeros(1), (freq_hz[:-1]-freq_hz[1:]))))
+    return phase_correction
+
 def sinewave(times, freq_hz):
     """sine wave"""
-    vals = np.sin(freq_hz*times*2.0*np.pi)
+    phase_correction = get_phase_correction_periodic(times, freq_hz)
+    vals = np.sin(freq_hz*times*2.0*np.pi+phase_correction)
     return vals
 
 def sawtooth(times, freq_hz):
     """sawtooth wave"""
-    period = 1.0/freq_hz
-    vals = 2.0 * (times/period - np.floor(.5 + times/period))
+    # fix phase correction for glissando
+    phase_correction = get_phase_correction_linear(times, freq_hz)
+    vals = 2 * ((times * freq_hz + phase_correction) % 1.0) - 1
     return vals
+
+# def div0( a, b ):
+#     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
+#     with np.errstate(divide='ignore', invalid='ignore'):
+#         c = np.true_divide( a, b )
+#         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
+#     return c
 
 def triangle(times, freq_hz):
     """triangle wave"""
     period = 1.0/freq_hz
-    vals = (2.0 / np.pi )* np.arcsin(np.sin(2.0*np.pi*times/period))
+    
+    phase_correction = get_phase_correction_periodic(times, freq_hz)
+    vals = (2.0 / np.pi )* np.arcsin(np.sin(2.0*np.pi*times/period + phase_correction))
     return vals
 
 def square(times, freq_hz):
@@ -160,6 +193,36 @@ def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = 
             #print 'intsi', i, intsi
 
         #wavelib.write_wave_file('output/shepard_' + str(i) + '.wav', valsi)
+        vals += valsi
+
+    return vals
+
+def shepardtone1(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, num_octaves_down=3, num_octaves_up=3):
+    """generates a shepard tone using octaves of the given frequency"""
+    # print('freq ', freq)
+    vals = waveform_generator(times, freq)
+
+    for i in range(0, num_octaves_down):
+        freqi = freq * 2.0**(-(i+1))
+        #print 'i', i, freqi
+        valsi = waveform_generator(times, freqi)
+        if i == (num_octaves_down-1):
+            #intsi = (freq - peak_freq)/peak_freq
+            intsi = np.abs(freq - peak_freq)/peak_freq
+            print("intsi last lower octave ", i, intsi)
+            valsi = valsi * intsi
+        vals += valsi
+
+    for i in range(0, num_octaves_up):
+        freqi = freq * 2.0**(i+1)
+        #print 'i', i, freqi
+        valsi = waveform_generator(times, freqi)
+        if i == (num_octaves_up-1):
+            # intsi = 1.0 - (freq - peak_freq)/peak_freq
+            #intsi = 1.0 - (freq - peak_freq)/(np.maximum(peak_freq, freq))
+            intsi = 1.0 - np.abs(peak_freq - freq)/peak_freq
+            print("intsi last upper octave ", i, intsi)
+            valsi = valsi * intsi
         vals += valsi
 
     return vals
