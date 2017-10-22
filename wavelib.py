@@ -113,18 +113,18 @@ def play_n(vals, n):
 
 def write_wave_file(filename, vals, nchannels=2, sample_width=2, sample_rate=SAMPLE_RATE):
     """Write wave values to file. Assumes vals have been normalized to 1.0 scale"""
-    f_str = ''
+    f_str = []
     for i in vals:
         amp = int(i * MAX_AMP)
         data = struct.pack('<hh', amp, amp) # < means little endian, hh because 2 integers
         #f.writeframes(data) # cade says append to string instead of writing frames here
-        f_str += data
+        f_str.append(data)
     wavef = wave.open(filename, 'wb')
     wavef.setnchannels(nchannels)
     wavef.setsampwidth(sample_width)
     wavef.setframerate(sample_rate)
-    wavef.writeframes(f_str)
-    wavef.writeframes('')
+    wavef.writeframes(b''.join(f_str))
+    #wavef.writeframes('')
     wavef.close()
 
 def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = sinewave):
