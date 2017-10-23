@@ -81,7 +81,7 @@ def get_phase_correction_periodic(times, freq_hz):
     do_phase_correct = type(freq_hz).__module__ == np.__name__
     phase_correction = 1.0
     if do_phase_correct:
-        phase_correction = np.add.accumulate(times*np.concatenate((np.zeros(1), 2*np.pi*(freq_hz[:-1]-freq_hz[1:]))))
+        phase_correction = np.add.accumulate(times*np.concatenate((np.zeros(1), 2.0*np.pi*(freq_hz[:-1]-freq_hz[1:]))))
     return phase_correction
 
 def get_phase_correction_linear(times, freq_hz):
@@ -158,8 +158,8 @@ def shepardtone(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, n
 
     # TODO need a more octave-friendly kind of modulo.  e.g. 220 -> 440.  880 -> 440, 
     #freq = freq % peak_freq + peak_freq
-    freq = freq % peak_freq + peak_freq
-    print ('freq modulo', freq)
+    #freq = freq % peak_freq + peak_freq
+    #print ('freq modulo', freq)
 
     vals = waveform_generator(times, freq)
 
