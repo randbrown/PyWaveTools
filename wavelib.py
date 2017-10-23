@@ -1,6 +1,5 @@
 """ Wave tools """
 import wave
-import math
 import struct
 import numpy as np
 
@@ -43,13 +42,26 @@ def zero(times):
     """create a numpy array holding 0's"""
     return times * 0
 
+def glissando_lin(times, start_freq, end_freq):
+    """returns frequency array to represent glissando from start to end pitches, 
+    using linear scaling"""
+    freq = linear_scale_x(times, start_freq, end_freq)
+    return freq
+
 def glissando(times, start_freq, end_freq):
-    """returns frequency array to represent glissando from start to end pitches"""
-    return linear_scale_x(times, start_freq, end_freq) 
+    """returns frequency array to represent glissando from start to end pitches, 
+    using exponential scaling for more natural sound"""
+    a = times[0]
+    b = times[len(times)-1]
+    n = b-a
+    print('a', a, 'b', b, 'n', n, 'times', times)
+    g = (end_freq/start_freq) ** (1.0/n)
+    freq = start_freq * (g**(times-a))
+    return freq
 
 def glissando_rate(times, start_freq, freq_rate):
     """returns frequency array to represent glissando from start at a given rate"""
-    return (start_freq + (times*freq_rate)) 
+    return (start_freq + (times*freq_rate))
 
 def discrete(times, start_freq, end_freq, steps):
     """returns frequency array to represent steps from start to end pitches"""
@@ -92,22 +104,13 @@ def sinewave(times, freq_hz):
 
 def sawtooth(times, freq_hz):
     """sawtooth wave"""
-    # fix phase correction for glissando
     phase_correction = get_phase_correction_linear(times, freq_hz)
     vals = 2 * ((times * freq_hz + phase_correction) % 1.0) - 1
     return vals
 
-# def div0( a, b ):
-#     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
-#     with np.errstate(divide='ignore', invalid='ignore'):
-#         c = np.true_divide( a, b )
-#         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
-#     return c
-
 def triangle(times, freq_hz):
     """triangle wave"""
     period = 1.0/freq_hz
-    
     phase_correction = get_phase_correction_periodic(times, freq_hz)
     vals = (2.0 / np.pi )* np.arcsin(np.sin(2.0*np.pi*times/period + phase_correction))
     return vals
@@ -126,20 +129,6 @@ def linear_scale(x, minx, maxx, miny, maxy):
 
 def linear_scale_x(x, miny, maxy):
     return ((x - x.min()) / (x.max() - x.min())) * (maxy - miny) + miny
-
-def square_scale_x(x, miny, maxy):
-    xx = linear_scale_x(x, 0, 1.0)
-    return np.power(xx, 2)
-
-def quad_scale_x(x, miny, maxy):
-    """good approximation of exp for 0-1"""
-    xx = linear_scale_x(x, 0, 1.0)
-    return np.power(xx, 4)
-
-def exp_scale_x(x, miny, maxy):
-    """exponentially scale x to y values"""
-    xx = linear_scale_x(x, 0, 1.0)
-    return np.exp(6.908*xx)/1000.0
 
 def play_n(vals, n):
     return np.tile(vals, n)
@@ -160,46 +149,18 @@ def write_wave_file(filename, vals, nchannels=2, sample_width=2, sample_rate=SAM
     #wavef.writeframes('')
     wavef.close()
 
-def shepardtone(times, freq, falling=False, num_octaves=5, waveform_generator = sinewave):
+def shepardtone(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, num_octaves_down=3, num_octaves_up=3):
     """generates a shepard tone using octaves of the given frequency"""
+    print('freq ', freq)
 
-    vals = np.zeros(times.shape)
+    # if peak_freq == None:
+    #     peak_freq = np.average(peak_freq) * 1.5
 
-    # theoretically, it should probably be exponential scaling of intensity, 
-    # to fade one voice out while fading the other in.
-    # however, since they're in different octaves and such, i've been playing
-    # with alternative scalings
-    #ints_scale = wavelib.exp_scale_x(times, 0.0, 1.0)
-    ints_scale = linear_scale_x(times, 0.0, 1.0)
-    #ints_scale = wavelib.square_scale_x(times, 0.0, 1.0)
-    ints_scale_rev = ints_scale[::-1]
+    # TODO need a more octave-friendly kind of modulo.  e.g. 220 -> 440.  880 -> 440, 
+    #freq = freq % peak_freq + peak_freq
+    freq = freq % peak_freq + peak_freq
+    print ('freq modulo', freq)
 
-    for i in range(0, num_octaves):
-        freqi = freq * 2.0**i
-        #print 'i', i, freqi
-        valsi = waveform_generator(times, freqi)
-        if i == 0:
-            intsi = ints_scale
-            if(falling):
-                intsi = ints_scale_rev
-            
-            valsi = valsi * intsi
-            #print 'intsi', i, intsi
-        if i == num_octaves-1:
-            intsi = ints_scale_rev
-            if(falling):
-                intsi = ints_scale
-            valsi = valsi * intsi
-            #print 'intsi', i, intsi
-
-        #wavelib.write_wave_file('output/shepard_' + str(i) + '.wav', valsi)
-        vals += valsi
-
-    return vals
-
-def shepardtone1(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, num_octaves_down=3, num_octaves_up=3):
-    """generates a shepard tone using octaves of the given frequency"""
-    # print('freq ', freq)
     vals = waveform_generator(times, freq)
 
     for i in range(0, num_octaves_down):
@@ -209,7 +170,7 @@ def shepardtone1(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, 
         if i == (num_octaves_down-1):
             #intsi = (freq - peak_freq)/peak_freq
             intsi = np.abs(freq - peak_freq)/peak_freq
-            print("intsi last lower octave ", i, intsi)
+            #print("intsi last lower octave ", i, intsi)
             valsi = valsi * intsi
         vals += valsi
 
@@ -221,7 +182,7 @@ def shepardtone1(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, 
             # intsi = 1.0 - (freq - peak_freq)/peak_freq
             #intsi = 1.0 - (freq - peak_freq)/(np.maximum(peak_freq, freq))
             intsi = 1.0 - np.abs(peak_freq - freq)/peak_freq
-            print("intsi last upper octave ", i, intsi)
+            #print("intsi last upper octave ", i, intsi)
             valsi = valsi * intsi
         vals += valsi
 
