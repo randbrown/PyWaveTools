@@ -149,12 +149,12 @@ def write_wave_file(filename, vals, nchannels=2, sample_width=2, sample_rate=SAM
     #wavef.writeframes('')
     wavef.close()
 
-def shepardtone(times, freq, waveform_generator = sinewave, peak_freq=FREQ_A4, num_octaves_down=3, num_octaves_up=3):
+def shepardtone(times, freq, waveform_generator = sinewave, peak_freq=None, num_octaves_down=3, num_octaves_up=3):
     """generates a shepard tone using octaves of the given frequency"""
     print('freq ', freq)
 
-    # if peak_freq == None:
-    #     peak_freq = np.average(peak_freq) * 1.5
+    if peak_freq is None:
+        peak_freq = np.min(freq)
 
     # TODO need a more octave-friendly kind of modulo.  e.g. 220 -> 440.  880 -> 440, 
     #freq = freq % peak_freq + peak_freq
