@@ -18,17 +18,17 @@ def main():
 
     # times is array of values at each time slot of the whole wav file
     times = wavelib.createtimes(TOTAL_DURATION)
-    
-    freq = wavelib.glissando_lin(times, wavelib.FREQ_A5, wavelib.FREQ_A4)
-    vals = wavelib.shepardtone(times, freq, tritone_sine)
-    vals = wavelib.normalize(vals)
-    vals = wavelib.play_n(vals, 2)
-    wavelib.write_wave_file('output/shepard_tritone_down_2x.wav', vals)
 
-    freq = wavelib.glissando_lin(times, wavelib.FREQ_A4, wavelib.FREQ_A5)
-    vals = wavelib.shepardtone(times, freq, tritone_sine)
+    freq = wavelib.glissando_lin(times, wavelib.FREQ_A4, wavelib.FREQ_A3)
+    vals = wavelib.shepardtone(times, freq, tritone_sine, wavelib.FREQ_A3, 1, 1)
     vals = wavelib.normalize(vals)
-    vals = wavelib.play_n(vals, 2)
-    wavelib.write_wave_file('output/shepard_tritone_up_2x.wav', vals)
+    vals = wavelib.play_n(vals, 5)
+    wavelib.write_wave_file('output/shepard_tritone_down_5x.wav', vals)
+
+    freq = wavelib.glissando_lin(times, wavelib.FREQ_A3, wavelib.FREQ_A4)
+    vals = wavelib.shepardtone(times, freq, tritone_sine, wavelib.FREQ_A3, 1, 1)
+    vals = wavelib.normalize(vals)
+    vals = wavelib.play_n(vals, 5)
+    wavelib.write_wave_file('output/shepard_tritone_up_5x.wav', vals)
 
 main()
