@@ -130,6 +130,11 @@ def linear_scale(x, minx, maxx, miny, maxy):
 def linear_scale_x(x, miny, maxy):
     return ((x - x.min()) / (x.max() - x.min())) * (maxy - miny) + miny
 
+def fade(vals, start_level=0, end_level=1.0):
+    """fade in or out. Scales the vals beginning with start_level and ending with end_level"""
+    levels = np.linspace(start_level, end_level, len(vals))
+    return levels * vals
+
 def play_n(vals, n):
     return np.tile(vals, n)
 

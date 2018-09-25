@@ -31,4 +31,9 @@ def main():
     vals = wavelib.play_n(vals, 5)
     wavelib.write_wave_file('output/shepard_tritone_up_5x.wav', vals)
 
+    # create a crescendo, fading in from 0 to full volume at the very end
+    vals = wavelib.fade(vals)
+    wavelib.write_wave_file('output/shepard_tritone_up_5x_crescendo.wav', vals)
+
+
 main()
